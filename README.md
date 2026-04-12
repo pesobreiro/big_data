@@ -16,8 +16,8 @@ big_data/
 A pasta `data/` contém uma amostra de dados históricos de cryptomoedas (BTC, ETH, ADA) em formato Parquet, com timeframe de 4 horas.
 
 **Para aceder ao dataset completo (7.4GB+):**
-- Contactar: pesobreiro@gmail.com
-- Ou usar a API da Binance para obter dados atualizados
+- Usar a API da Binance para obter dados atualizados
+- Ou contactar o docente da UC
 
 ### Formatos disponíveis
 - `btc_04h_usdt_binance.parquet` - Bitcoin/USDT (4h)
@@ -86,7 +86,6 @@ jupyter lab
 ## 👨‍🏫 Autor
 
 **Pedro Sobreiro**
-- Email: pesobreiro@gmail.com
 - ORCID: 0000-0003-3971-3545
 - Professor, Investigador e Consultoria
 

@@ -74,7 +74,7 @@ df.show(5)
 - `eth_04h_usdt_binance.parquet` - Ethereum (4 horas)
 - `ada_04h_usdt_binance.parquet` - Cardano (4 horas)
 
-**Dataset completo (7.4GB):** Contactar pesobreiro@gmail.com
+**Dataset completo (7.4GB):** Usar API da Binance ou contactar docente
 
 ---
 
@@ -112,6 +112,6 @@ pip install pyspark pandas numpy matplotlib
 
 ## 📞 Suporte
 
-- Email: pesobreiro@gmail.com
+- Email: Disponível na plataforma Moodle da UC
 - ORCID: 0000-0003-3971-3545
 - Issues: [github.com/pedrosobreiro/big_data/issues](https://github.com/pedrosobreiro/big_data/issues)
