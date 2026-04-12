@@ -1,6 +1,6 @@
 # Elementos de Apoio - Processamento de Big Data
 
-Repositório de recursos educativos para a unidade curricular **Processamento de Big Data** da Pós-Graduação em Data Science.
+Repositório de recursos educativos.
 
 ## 📁 Estrutura
 
