@@ -166,19 +166,35 @@ conda install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipyke
 jupyter lab
 ```
 
-**Opção B — mamba (recomendado se conda ficar bloqueado):**
+**Opção B — conda com libmamba solver (recomendado se for lento):**
 
-O `conda install` pode ficar preso em "Solving environment" quando a base do Anaconda tem muitos pacotes. O mamba é um substituto direto que resolve o mesmo problema em segundos.
+O solver clássico do `conda` pode ficar preso em `"Solving environment"` durante minutos. A solução mais simples é manter o comando `conda` mas usar o **solver libmamba** por baixo — o mesmo motor do mamba, sem alterar a interface.
 
 ```bash
-# Instalar o solver rápido e mamba (uma única vez, no ambiente base)
+# Instalar o solver rápido (uma única vez, no ambiente base)
 conda install -n base conda-libmamba-solver --override-channels -c conda-forge -y
 conda config --set solver libmamba
-conda install -n base -c conda-forge mamba -y
 
-# Criar e configurar o ambiente
+# A partir daqui, todos os comandos conda usam o solver rápido automaticamente
 conda create -n bigdata python=3.11 -y
 conda activate bigdata
+conda install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
+jupyter lab
+```
+
+> **Vantagem:** continuas a usar `conda create`, `conda install`, `conda activate` — zero mudança de hábitos. Só o solver interno é mais rápido.
+
+**Opção C — mamba CLI (mais rápido ainda, interface alternativa):**
+
+Se quiseres uma ferramenta dedicada ainda mais rápida, podes instalar o `mamba` como comando alternativo ao `conda`. Resolve dependências e instala pacotes em segundos, mesmo em bases Anaconda grandes.
+
+```bash
+# Instalar o mamba CLI (uma única vez, no ambiente base)
+conda install -n base -c conda-forge mamba -y
+
+# Criar e configurar o ambiente com mamba
+mamba create -n bigdata python=3.11 -y
+mamba activate bigdata
 mamba install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
 jupyter lab
 ```

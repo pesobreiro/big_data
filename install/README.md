@@ -345,19 +345,18 @@ rápida é apagar o ambiente e recriar.
 conda deactivate
 conda remove -n bigdata --all -y
 conda create -n bigdata python=3.11 -y
-mamba install -n bigdata -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
+conda activate bigdata
+conda install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
 ```
 
-**Windows (PowerShell ou Anaconda Prompt):**
-
-```powershell
-conda deactivate
-conda remove -n bigdata --all -y
-conda create -n bigdata python=3.11 -y
-mamba install -n bigdata -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
-```
-
-> Se `mamba` não estiver disponível: `conda install -n base -c conda-forge mamba -y`
+> Se o `conda install` demorar muito ("Solving environment"), usar o **solver libmamba** (mais rápido, mesma interface):
+> ```bash
+> conda install -n base conda-libmamba-solver --override-channels -c conda-forge -y
+> conda config --set solver libmamba
+> # repetir o conda install acima — agora é rápido
+> ```
+>
+> Ou usar o **mamba CLI** (ver README principal — Opção C).
 
 Ou correr novamente o script de instalação — deteta que o ambiente não existe e recria-o:
 
