@@ -83,7 +83,7 @@ jupyter lab
 ```bash
 conda create -n bigdata python=3.11
 conda activate bigdata
-conda install -c conda-forge openjdk pyspark jupyterlab
+conda install -c conda-forge openjdk=17 pyspark jupyterlab ipykernel
 jupyter lab
 ```
 
