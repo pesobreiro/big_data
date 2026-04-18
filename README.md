@@ -183,6 +183,40 @@ mamba install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipyke
 jupyter lab
 ```
 
+#### Mamba e Conda coexistem?
+
+**Sim, podem coexistir perfeitamente** — e é inclusive a forma recomendada de usar o mamba.
+
+**Partilham a mesma infraestrutura:**
+- O mamba usa o mesmo root prefix do conda (`~/anaconda3` ou `~/miniconda3`).
+- Os ambientes criados com `mamba create` aparecem em `conda env list` e vice-versa.
+- `mamba activate bigdata` e `conda activate bigdata` funcionam no mesmo conjunto de ambientes.
+
+**O que difere:**
+- **Velocidade:** o mamba resolve dependências e instala pacotes muito mais rápido que o conda (especialmente em ambientes complexos).
+- **Compatibilidade:** o mamba é mais estrito com certas dependências, enquanto o conda às vezes é mais flexível.
+
+**Uso prático comum:**
+```bash
+# Criar ambiente rápido com mamba
+mamba create -n bigdata python=3.11 -y
+
+# Ativar com conda ou mamba — ambos funcionam
+conda activate bigdata
+# ou
+mamba activate bigdata
+
+# Instalar mais pacotes
+mamba install -c conda-forge pyarrow    # mais rápido
+conda install -c conda-forge jupyter    # também funciona
+```
+
+**Cuidados mínimos:**
+- Mantém o `MAMBA_ROOT_PREFIX` apontando para o teu Anaconda/Miniconda (configura-se automaticamente).
+- Não corras `mamba` e `conda` em simultâneo no mesmo ambiente — pode bloquear a base de dados de pacotes.
+
+**Resumindo:** instalar o mamba no `base` do conda é a prática standard. Usa o mamba quando quiseres velocidade, e o conda quando quiseres compatibilidade máxima — ambos veem os mesmos ambientes.
+
 **Verificar a instalação (obrigatório antes da primeira utilização):**
 
 ```bash
