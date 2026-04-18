@@ -281,7 +281,7 @@ Os notebooks estão na pasta `notebooks/`.
 | `Port 8888 already in use` | Outro JupyterLab ativo | Correr `jupyter lab --port 8889` |
 | PySpark demora a iniciar | Normal na primeira vez | Aguardar 30-60 segundos |
 | `Permission denied` no Linux | Script sem permissão de execução | Usar `bash install/linux_install.sh` (não `./`) |
-| `cannot import name '_builtin_table'` | PySpark < 3.5 com pandas 2.x | Ver secção abaixo |
+| `cannot import name '_builtin_table'` | Bug em todas as versões pip do PySpark com pandas 2.x | Usar `.toPandas()` em vez de `pyspark.pandas` (ver secção abaixo) |
 
 ### Remover e reinstalar o ambiente `bigdata` do zero
 
@@ -325,21 +325,22 @@ python install/verify_install.py
 
 ### Erro: `cannot import name '_builtin_table'`
 
-Este erro ocorre quando o ambiente tem **PySpark 3.3 ou 3.4** com **pandas 2.x**. A API `pyspark.pandas` nestas versões não suporta pandas 2.0+. O PySpark 3.5+ corrige o problema.
+Este erro ocorre com `import pyspark.pandas as ps`. O atributo `_builtin_table` foi removido do pandas 2.0
+e o bug persiste em **todas as versões pip do PySpark**, incluindo 4.x.
 
-Corrigir sem recriar o ambiente:
+**Solução definitiva — não usar `pyspark.pandas`:**
 
-```bash
-conda activate bigdata
-conda install -c conda-forge "pyspark>=3.5" -y
+```python
+# Em vez de:
+import pyspark.pandas as ps
+df = ps.DataFrame(df_spark)
+
+# Usar:
+df = df_spark.toPandas()
 ```
 
-Verificar versões após a atualização:
-
-```bash
-conda activate bigdata
-python -c "import pyspark, pandas; print('PySpark', pyspark.__version__, '/ pandas', pandas.__version__)"
-```
+`.toPandas()` é o método nativo, sem dependências de versão, e funciona sempre.
+Os notebooks deste projeto já estão corrigidos para usar `.toPandas()`.
 
 ### Anaconda instalado + Orange noutra disciplina
 

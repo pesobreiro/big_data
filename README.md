@@ -151,11 +151,23 @@ Fechar e reabrir o terminal após este passo.
 
 O comando seguinte é igual em Mac, Windows e Linux. O `openjdk=17` instala o Java automaticamente dentro do ambiente conda, sem necessidade de instalar Java no sistema.
 
-> **Nota:** O `conda install` pode ficar bloqueado em "Solving environment" com muitos pacotes.
-> Usar **mamba** em vez de conda resolve este problema — é um substituto direto, muito mais rápido.
+**Opção A — conda (standard):**
 
 ```bash
-# Instalar mamba (uma única vez, no ambiente base)
+conda create -n bigdata python=3.11 -y
+conda activate bigdata
+conda install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
+jupyter lab
+```
+
+**Opção B — mamba (recomendado se conda ficar bloqueado):**
+
+O `conda install` pode ficar preso em "Solving environment" quando a base do Anaconda tem muitos pacotes. O mamba é um substituto direto que resolve o mesmo problema em segundos.
+
+```bash
+# Instalar o solver rápido e mamba (uma única vez, no ambiente base)
+conda install -n base conda-libmamba-solver --override-channels -c conda-forge -y
+conda config --set solver libmamba
 conda install -n base -c conda-forge mamba -y
 
 # Criar e configurar o ambiente
@@ -211,18 +223,25 @@ import pyspark
 
 ### Porquê PySpark >= 3.5 é obrigatório
 
-O PySpark inclui uma API chamada `pyspark.pandas` que permite usar sintaxe pandas em cima do Spark.
-Nas versões 3.3 e 3.4 do PySpark, essa API dependia de um atributo interno do pandas
-(`pandas.core.common._builtin_table`) que foi **removido no pandas 2.0**.
+O PySpark inclui uma API chamada `pyspark.pandas` que permite usar sintaxe pandas em cima do Spark distribuído.
+Nas versões 3.3 e 3.4, essa API dependia de `pandas.core.common._builtin_table`, atributo **removido no pandas 2.0**.
 
-Resultado: quem tiver PySpark 3.3/3.4 com pandas 2.x vê este erro ao correr `import pyspark.pandas`:
+O PySpark 3.5+ corrigiu parcialmente o problema, mas o bug persiste em todas as versões disponíveis via pip
+(incluindo 4.x). Por isso os notebooks deste projeto **não usam `pyspark.pandas`** — usam `.toPandas()` em alternativa.
 
+**Conversão correta de Spark DataFrame para pandas:**
+
+```python
+# NÃO usar — bug com pandas 2.x em todas as versões pip:
+# import pyspark.pandas as ps
+# df_pandas = ps.DataFrame(df_spark)
+
+# Usar sempre:
+df_pandas = df_spark.toPandas()
 ```
-ImportError: cannot import name '_builtin_table' from 'pandas.core.common'
-```
 
-O PySpark 3.5 (lançado em setembro de 2023) reescreveu a integração com pandas e passou a ser
-compatível com pandas 2.x. Por isso os scripts de instalação fixam `pyspark>=3.5`.
+`.toPandas()` é o método nativo do PySpark, não tem dependências externas, e funciona com qualquer versão de pandas.
+A limitação é que traz todos os dados para memória — adequado para datasets que cabem numa máquina.
 
 ### Porquê Java 17 e não Java 8 ou 11
 
@@ -265,6 +284,41 @@ code --install-extension ms-toolsai.jupyter-celltags
 Depois abrir um `.ipynb`, clicar em **Select Kernel** (canto superior direito) e escolher o ambiente **bigdata**.
 
 Ver [install/README.md](install/README.md) para instruções detalhadas de seleção de kernel e ligação a servidor JupyterLab externo (incluindo Docker).
+
+## Assistente de IA para instalação e resolução de problemas
+
+Para agilizar a configuração do ambiente e resolver erros, recomenda-se usar o **Gemini CLI** — um assistente de IA gratuito que corre diretamente no terminal e tem acesso ao contexto do sistema.
+
+### Instalar o Gemini CLI
+
+```bash
+npm install -g @google/gemini-cli
+gemini
+```
+
+Na primeira execução pede login com conta Google. Após autenticação fica disponível no terminal como `gemini`.
+
+### Exemplos de uso durante a instalação
+
+Descrever o erro diretamente no terminal e pedir ajuda:
+
+```bash
+gemini
+```
+
+```
+> conda install está bloqueado em "Solving environment". Como resolver?
+> Erro: JAVA_HOME is not set. O que significa e como corrigir no Windows?
+> Como verificar se o ambiente bigdata está correto e o PySpark funciona?
+```
+
+O Gemini CLI tem acesso ao sistema de ficheiros e ao terminal, pelo que pode analisar
+logs de erro, verificar versões instaladas e sugerir comandos específicos para a situação.
+
+### Alternativas
+
+- **Claude Code** — `npm install -g @anthropic-ai/claude-code` — alternativa ao Gemini CLI
+- **GitHub Copilot** no VS Code — integrado no editor, útil para erros nos notebooks
 
 ## 📚 Recursos Adicionais
 
