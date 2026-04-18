@@ -207,25 +207,44 @@ ls ~/miniconda3/bin/conda 2>/dev/null || echo "Miniconda não encontrado"
 ```
 
 ### Solução imediata — inicializar shell
+
+**Mac / Linux:**
 ```bash
-~/miniconda3/bin/conda init bash    # Linux
-~/miniconda3/bin/conda init zsh     # Mac
+~/miniconda3/bin/conda init bash    # Linux (bash)
+~/miniconda3/bin/conda init zsh     # Mac (zsh)
 ```
 
-**Fechar e reabrir o terminal** (obrigatório).
+**Windows — PowerShell:**
+```powershell
+$HOME\miniconda3\Scripts\conda init powershell
+```
+
+**Windows — CMD (linha de comandos):**
+```cmd
+%USERPROFILE%\miniconda3\Scripts\conda init cmd.exe
+```
+
+> **⚠️ Importante:** Depois de correr o `conda init`, é obrigatório **fechar e reabrir o terminal** (ou reiniciar o PowerShell/CMD).
 
 ### Solução temporária (sem reiniciar terminal)
+
+**Mac / Linux:**
 ```bash
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate bigdata
 ```
 
-### Windows
+**Windows — PowerShell:**
 ```powershell
-$HOME\miniconda3\Scripts\conda init powershell
+$env:PATH = "$HOME\miniconda3\Scripts;$HOME\miniconda3\condabin;$env:PATH"
+conda activate bigdata
 ```
 
-Reiniciar o PowerShell.
+**Windows — CMD:**
+```cmd
+set PATH=%USERPROFILE%\miniconda3\Scripts;%USERPROFILE%\miniconda3\condabin;%PATH%
+conda activate bigdata
+```
 
 ---
 
