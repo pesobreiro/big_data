@@ -44,6 +44,16 @@ A pasta `data/` contém uma amostra de dados históricos de cryptomoedas (BTC, E
 
 ## 🚀 Como usar
 
+### Instalar o Git (Windows)
+
+Se ainda não tens o Git instalado, podes instalá-lo facilmente via **winget**:
+
+```powershell
+winget install --id Git.Git -e --source winget
+```
+
+> Nota: O `winget` já vem incluído no Windows 10 (20H2+) e Windows 11. Após a instalação, reinicia o terminal para garantir que o comando `git` fica disponível.
+
 ### Opção 1: Google Colab (recomendado para iniciantes)
 1. Aceder a [colab.research.google.com](https://colab.research.google.com)
 2. Fazer upload do notebook desejado
