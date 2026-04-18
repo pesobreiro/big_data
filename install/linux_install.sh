@@ -131,8 +131,24 @@ fi
 install_packages "$ENV_NAME" \
     "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
 
+# ── 3.5. Configurar JAVA_HOME persistente ──────────────────────────────────────
+ENV_PATH=$(conda env list | grep "^$ENV_NAME " | awk '{print $2}')
+if [[ -d "$ENV_PATH/lib/jvm" ]]; then
+    echo "  Java detetado em $ENV_PATH/lib/jvm"
+    # Garantir scripts de ativação (o openjdk do conda-forge já cria, mas serve de fallback)
+    if [[ ! -f "$ENV_PATH/etc/conda/activate.d/openjdk_activate.sh" ]]; then
+        mkdir -p "$ENV_PATH/etc/conda/activate.d"
+        echo 'export JAVA_HOME="$CONDA_PREFIX/lib/jvm"' > "$ENV_PATH/etc/conda/activate.d/java_home.sh"
+        mkdir -p "$ENV_PATH/etc/conda/deactivate.d"
+        echo 'unset JAVA_HOME' > "$ENV_PATH/etc/conda/deactivate.d/java_home.sh"
+        echo "  Scripts de ativação do Java criados."
+    fi
+else
+    echo "  AVISO: Java não detetado no ambiente. A instalação pode ter falhado." >&2
+fi
+
 # ── 4. Verificação ─────────────────────────────────────────────────────────────
-echo "[4/4] A verificar instalação..."
+echo "[4/5] A verificar instalação..."
 conda run -n "$ENV_NAME" python - <<'EOF'
 import pyspark
 from pyspark.sql import SparkSession
@@ -141,8 +157,11 @@ spark.stop()
 print(f"  PySpark {pyspark.__version__} — OK")
 EOF
 
+# ── 5. Instruções finais ───────────────────────────────────────────────────────
 echo ""
 echo "=== Instalação concluída ==="
+echo ""
+echo "IMPORTANTE: O ambiente conda deve estar ATIVO antes de usar o PySpark."
 echo ""
 if [[ "$FORCE_MINICONDA" == true ]]; then
     echo "Para iniciar o JupyterLab nesta sessão:"
@@ -150,10 +169,17 @@ if [[ "$FORCE_MINICONDA" == true ]]; then
     echo "  conda activate $ENV_NAME"
     echo "  jupyter lab"
     echo ""
-    echo "Ou usar o script de arranque:"
+    echo "Ou usar o script de arranque (ativa automaticamente):"
     echo "  bash install/start_pyspark.sh"
 else
     echo "Para iniciar o JupyterLab:"
     echo "  conda activate $ENV_NAME"
     echo "  jupyter lab"
+    echo ""
+    echo "Ou usar o script de arranque (ativa automaticamente):"
+    echo "  bash install/start_pyspark.sh"
 fi
+echo ""
+echo "Verificar a instalação:"
+echo "  conda activate $ENV_NAME"
+echo "  python install/verify_install.py"

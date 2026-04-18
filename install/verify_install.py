@@ -5,6 +5,7 @@ Uso: python install/verify_install.py
 
 import sys
 import os
+import shutil
 
 CHECKS = []
 
@@ -15,23 +16,64 @@ def check(label, fn):
     except Exception as e:
         CHECKS.append(("FAIL", label, str(e)))
 
-# Python
+def find_conda_java():
+    """Tenta encontrar o Java instalado no ambiente conda atual."""
+    conda_prefix = os.environ.get("CONDA_PREFIX")
+    if conda_prefix:
+        candidates = [
+            os.path.join(conda_prefix, "lib", "jvm"),
+            os.path.join(conda_prefix, "Library"),
+        ]
+        for candidate in candidates:
+            java_bin = os.path.join(candidate, "bin", "java")
+            if os.path.exists(java_bin) or os.path.exists(java_bin + ".exe"):
+                return candidate
+    return None
+
+def find_system_java():
+    """Tenta encontrar o Java no PATH do sistema."""
+    java_path = shutil.which("java")
+    if java_path:
+        # java está em .../bin/java, JAVA_HOME é o diretório pai de bin
+        return os.path.dirname(os.path.dirname(java_path))
+    return None
+
+# ── Python ────────────────────────────────────────────────────────────────────
 check("Python >= 3.9", lambda: (
     f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     if sys.version_info >= (3, 9) else (_ for _ in ()).throw(RuntimeError(f"Python {sys.version} — requer 3.9+"))
 ))
 
-# JAVA_HOME
-check("JAVA_HOME definido", lambda: os.environ.get("JAVA_HOME") or (_ for _ in ()).throw(RuntimeError("JAVA_HOME não definido")))
+# ── JAVA_HOME ─────────────────────────────────────────────────────────────────
+def _java_home_check():
+    java_home = os.environ.get("JAVA_HOME")
+    if java_home:
+        return java_home
+    # Tentar auto-detetar
+    conda_java = find_conda_java()
+    if conda_java:
+        os.environ["JAVA_HOME"] = conda_java
+        return f"{conda_java} (auto-detetado do ambiente conda)"
+    system_java = find_system_java()
+    if system_java:
+        os.environ["JAVA_HOME"] = system_java
+        return f"{system_java} (auto-detetado do PATH)"
+    raise RuntimeError(
+        "JAVA_HOME não definido e Java não detetado.\n"
+        "  → Garante que o ambiente conda 'bigdata' está ativo: conda activate bigdata\n"
+        "  → Ou define JAVA_HOME manualmente (ver install/README.md)"
+    )
 
-# Pacotes
+check("JAVA_HOME definido", _java_home_check)
+
+# ── Pacotes ───────────────────────────────────────────────────────────────────
 for pkg in ["pyspark", "pyarrow", "jupyterlab"]:
     def _check(p=pkg):
         mod = __import__(p.replace("-", "_"))
         return getattr(mod, "__version__", "instalado")
     check(f"Pacote {pkg}", _check)
 
-# SparkSession
+# ── SparkSession ──────────────────────────────────────────────────────────────
 def _spark_check():
     from pyspark.sql import SparkSession
     spark = SparkSession.builder \
@@ -49,7 +91,7 @@ def _spark_check():
 
 check("SparkSession funcional", _spark_check)
 
-# ── Relatório ──────────────────────────────────────────────────────────────────
+# ── Relatório ─────────────────────────────────────────────────────────────────
 print("\n=== Verificação do ambiente PySpark ===\n")
 all_ok = True
 for status, label, detail in CHECKS:

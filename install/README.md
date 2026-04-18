@@ -19,6 +19,35 @@ O ambiente criado chama-se `bigdata` e inclui:
 - JupyterLab
 - PyArrow
 
+## ⚠️ Requisito crítico: Java
+
+O PySpark corre sobre a JVM (Java Virtual Machine) — **é obrigatório ter Java instalado**.
+
+Neste projeto, o Java é instalado **automaticamente** dentro do ambiente conda (`openjdk=17`)
+e o `JAVA_HOME` é configurado automaticamente quando o ambiente `bigdata` está ativo.
+
+**O problema mais comum em aulas:** o aluno não ativa o ambiente conda antes de correr o
+JupyterLab, ou abre o VS Code sem selecionar o kernel correto. Quando o ambiente não está
+ativo, o Java não é encontrado e o PySpark falha com erros do tipo:
+- `JAVA_HOME is not set`
+- `Java gateway process exited`
+- `RuntimeError: Java not found`
+
+**Regra de ouro:** sempre que fores usar o PySpark, garante que o ambiente está ativo:
+
+```bash
+conda activate bigdata
+```
+
+**Verificar rapidamente:**
+
+```bash
+conda activate bigdata
+python install/verify_install.py
+```
+
+Se a verificação passar, o ambiente está correto.
+
 ## Anaconda já instalado?
 
 **Os scripts funcionam com Anaconda ou Miniconda — não é necessário instalar nada de novo.**
@@ -270,14 +299,29 @@ jupyter lab
 Abrir [http://localhost:8888](http://localhost:8888) no browser.
 Os notebooks estão na pasta `notebooks/`.
 
+### Script de arranque rápido (evita erros de ativação)
+
+Em vez de ativar manualmente o ambiente, podes usar o script de arranque que deteta
+e ativa o ambiente automaticamente:
+
+**Mac / Linux:**
+```bash
+bash install/start_pyspark.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+.\install\start_pyspark.ps1
+```
+
 ---
 
 ## Resolução de problemas frequentes
 
 | Problema | Causa provável | Solução |
 |----------|---------------|---------|
+| `JAVA_HOME is not set` / Java gateway error | Ambiente conda não ativado ou Java não instalado | 1. `conda activate bigdata`<br>2. Correr `python install/verify_install.py`<br>3. Se ainda falhar no Windows, ver secção Windows acima |
 | `conda: command not found` | conda não inicializado | Fechar/reabrir terminal ou correr `conda init` |
-| `JAVA_HOME is not set` | Java não detetado | Ver secção Windows acima ou reinstalar com o script |
 | `Port 8888 already in use` | Outro JupyterLab ativo | Correr `jupyter lab --port 8889` |
 | PySpark demora a iniciar | Normal na primeira vez | Aguardar 30-60 segundos |
 | `Permission denied` no Linux | Script sem permissão de execução | Usar `bash install/linux_install.sh` (não `./`) |

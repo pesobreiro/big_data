@@ -27,4 +27,17 @@ if ! command -v conda &>/dev/null; then
 fi
 
 conda activate "$ENV_NAME"
+
+# Garantir JAVA_HOME se não estiver definido (o conda deve definir via scripts de ativação,
+# mas serve de segurança se algo falhou)
+if [[ -z "${JAVA_HOME:-}" ]]; then
+    if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -d "$CONDA_PREFIX/lib/jvm" ]]; then
+        export JAVA_HOME="$CONDA_PREFIX/lib/jvm"
+        echo "[INFO] JAVA_HOME auto-definido: $JAVA_HOME"
+    else
+        echo "AVISO: JAVA_HOME não está definido. O PySpark pode falhar." >&2
+        echo "  → Garante que o ambiente 'bigdata' está ativo: conda activate bigdata" >&2
+    fi
+fi
+
 jupyter lab --notebook-dir="$(dirname "$(dirname "$0")")"

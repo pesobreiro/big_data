@@ -116,6 +116,25 @@ if ($envExists) {
 mamba install -n $ENV_NAME -c conda-forge `
     "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
 
+# ── 4.5. Configurar JAVA_HOME persistente ─────────────────────────────────────
+$envPath = (conda env list | Select-String "^$ENV_NAME\s").Line.Split()[-1]
+if (Test-Path (Join-Path $envPath "Library\bin\java.exe")) {
+    Write-Host "  Java detetado em $envPath\Library" -ForegroundColor Green
+    # Criar scripts de ativação PowerShell (fallback)
+    $activateDir = Join-Path $envPath "etc\conda\activate.d"
+    $deactivateDir = Join-Path $envPath "etc\conda\deactivate.d"
+    New-Item -ItemType Directory -Force -Path $activateDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $deactivateDir | Out-Null
+    '$env:JAVA_HOME = "$env:CONDA_PREFIX\Library"' | Out-File -FilePath (Join-Path $activateDir "java_home.ps1") -Encoding utf8
+    'Remove-Item Env:\JAVA_HOME -ErrorAction SilentlyContinue' | Out-File -FilePath (Join-Path $deactivateDir "java_home.ps1") -Encoding utf8
+    # Também criar .bat para cmd/Anaconda Prompt
+    'set JAVA_HOME=%CONDA_PREFIX%\Library' | Out-File -FilePath (Join-Path $activateDir "java_home.bat") -Encoding utf8
+    'set JAVA_HOME=' | Out-File -FilePath (Join-Path $deactivateDir "java_home.bat") -Encoding utf8
+    Write-Host "  Scripts de ativação do Java criados." -ForegroundColor Green
+} else {
+    Write-Host "  AVISO: Java não detetado no ambiente. A instalação pode ter falhado." -ForegroundColor Red
+}
+
 # ── 5. Verificação ─────────────────────────────────────────────────────────────
 Write-Host "[5/5] A verificar instalação..." -ForegroundColor Yellow
 
@@ -133,17 +152,24 @@ conda run -n $ENV_NAME python -c $testScript
 Write-Host ""
 Write-Host "=== Instalação concluída ===" -ForegroundColor Cyan
 Write-Host ""
+Write-Host "IMPORTANTE: O ambiente conda deve estar ATIVO antes de usar o PySpark." -ForegroundColor Yellow
+Write-Host ""
 if ($Miniconda) {
-    Write-Host "Para iniciar o JupyterLab com Miniconda (usar Anaconda Prompt do Miniconda):"
+    Write-Host "Para iniciar o JupyterLab com Miniconda:"
     Write-Host "  conda activate $ENV_NAME"
     Write-Host "  jupyter lab"
     Write-Host ""
-    Write-Host "Ou no PowerShell, adicionar o Miniconda ao PATH primeiro:"
-    Write-Host "  `$env:PATH = `"$MINICONDA_DIR\Scripts;`$env:PATH`""
-    Write-Host "  conda activate $ENV_NAME"
-    Write-Host "  jupyter lab"
+    Write-Host "Ou usar o script de arranque (ativa automaticamente):"
+    Write-Host "  .\install\start_pyspark.ps1"
 } else {
     Write-Host "Para iniciar o JupyterLab:"
     Write-Host "  conda activate $ENV_NAME"
     Write-Host "  jupyter lab"
+    Write-Host ""
+    Write-Host "Ou usar o script de arranque (ativa automaticamente):"
+    Write-Host "  .\install\start_pyspark.ps1"
 }
+Write-Host ""
+Write-Host "Verificar a instalação:"
+Write-Host "  conda activate $ENV_NAME"
+Write-Host "  python install\verify_install.py"

@@ -177,6 +177,15 @@ mamba install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipyke
 jupyter lab
 ```
 
+**Verificar a instalação (obrigatório antes da primeira utilização):**
+
+```bash
+conda activate bigdata
+python install/verify_install.py
+```
+
+Se verificares `[OK]` em todos os itens, o ambiente está pronto.
+
 #### Verificar a instalação
 
 ```bash
@@ -207,6 +216,13 @@ import os
 os.environ['JAVA_HOME'] = os.path.join(os.environ['CONDA_PREFIX'], 'Library')
 
 import pyspark
+```
+
+**Script de arranque automático (Windows):**
+
+Para evitar problemas de ativação do ambiente, usar o script de arranque:
+```powershell
+.\install\start_pyspark.ps1
 ```
 
 ## 📝 Requisitos e compatibilidade de versões
