@@ -316,6 +316,13 @@ bash install/start_pyspark.sh
 
 ---
 
+## 🛟 Playbook de Contingência para Aula
+
+Para cenários de alunos "stuck" durante a instalação ou utilização, consultar:
+**[`install/CONTINGENCY.md`](CONTINGENCY.md)** — Diagnóstico rápido + solução imediata + plano nuclear para cada problema.
+
+---
+
 ## Resolução de problemas frequentes
 
 | Problema | Causa provável | Solução |

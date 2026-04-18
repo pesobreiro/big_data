@@ -43,6 +43,12 @@ A pasta `data/` contém uma amostra de dados históricos de cryptomoedas (BTC, E
 | `11_structured_streaming.ipynb` | Streaming estruturado |
 | `12_dados_reais_crypto.ipynb` | Exemplo com dados reais |
 
+## 🛟 Problemas em aula?
+
+Se um aluno ficar "stuck" durante a instalação ou uso do ambiente, consultar o **Playbook de Contingência** em [`install/CONTINGENCY.md`](install/CONTINGENCY.md). Inclui diagnóstico rápido, soluções imediatas e workarounds (incluindo Google Colab como plano de fuga).
+
+---
+
 ## 🚀 Como usar
 
 ### Opção 1: Docker (recomendado — funciona em Mac, Windows e Linux)
