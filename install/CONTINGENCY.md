@@ -411,14 +411,14 @@ df = spark.read.parquet("/content/btc_04h_usdt_binance.parquet")
 
 ---
 
-## 📋 Checklist rápido para o docente em aula
+## 📋 Checklist rápido
 
-Antes de começar a aula:
+Antes:
 - [ ] Verificar que o repositório clona corretamente (`git clone ...`)
 - [ ] Correr `python install/verify_install.py` no teu ambiente
 - [ ] Ter o link do Colab pronto como backup
 
-Durante a aula, quando um aluno levanta a mão:
+Depois:
 1. **Perguntar primeiro:** "Correste `conda activate bigdata`?"
 2. **Segundo:** "Correste `python install/verify_install.py`? O que diz?"
 3. **Terceiro:** Apontar para o cenário correspondente neste playbook
