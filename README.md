@@ -7,8 +7,9 @@ Repositório de recursos educativos.
 ```
 big_data/
 ├── data/               # Dados de exemplo (cryptomoedas)
+├── install/            # Scripts de instalação por plataforma
 ├── notebooks/          # Notebooks Jupyter com exemplos práticos
-└── README.md          # Este ficheiro
+└── README.md           # Este ficheiro
 ```
 
 ## 📊 Dados
@@ -42,56 +43,355 @@ A pasta `data/` contém uma amostra de dados históricos de cryptomoedas (BTC, E
 | `11_structured_streaming.ipynb` | Streaming estruturado |
 | `12_dados_reais_crypto.ipynb` | Exemplo com dados reais |
 
+## 🛟 Problemas em aula?
+
+Se um aluno ficar "stuck" durante a instalação ou uso do ambiente, consultar o **Playbook de Contingência** em [`install/CONTINGENCY.md`](install/CONTINGENCY.md). Inclui diagnóstico rápido, soluções imediatas e workarounds (incluindo Google Colab como plano de fuga).
+
+---
+
 ## 🚀 Como usar
 
-### Instalar ferramentas base (Windows)
+### Opção 1: Docker (recomendado — funciona em Mac, Windows e Linux)
 
-Se ainda não tens estas ferramentas instaladas, podes obtê-las facilmente via **winget**:
+O Docker resolve automaticamente todos os problemas de Java e configuração do PySpark.
+É a forma mais fiável de ter um ambiente idêntico em qualquer sistema operativo.
 
-**Git:**
+**Passo 1 — Instalar o Docker Desktop:**
+
+**Mac (via Homebrew):**
+```bash
+brew install --cask docker
+```
+Ou fazer download direto em [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/). Após instalar, abrir o Docker Desktop pela primeira vez para completar a configuração.
+
+**Windows (via winget):**
 ```powershell
-winget install --id Git.Git -e --source winget
+winget install --id Docker.DockerDesktop -e --source winget
+```
+Durante a instalação, aceitar a opção **WSL 2** quando solicitado. Reiniciar o computador após a instalação e abrir o Docker Desktop.
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
 ```
 
-**Miniconda:**
+**Linux (verificar instalação):**
+```bash
+docker run hello-world
+```
+
+**Passo 2 — Clonar o repositório e iniciar:**
+```bash
+git clone <url-do-repositorio>
+cd big_data
+docker compose up
+```
+
+**Passo 3 — Abrir o JupyterLab:**
+
+Aceder a [http://localhost:8888](http://localhost:8888) no browser. Os notebooks estão na pasta `work/notebooks/`.
+
+**Parar o ambiente:**
+```bash
+docker compose down
+```
+
+> **Nota Windows:** Se o comando `docker compose` não for reconhecido, usa `docker-compose` (com hífen). Certifica-te que o Docker Desktop está em execução antes de correr os comandos.
+
+---
+
+### Opção 2: Google Colab (sem instalação)
+
+1. Aceder a [colab.research.google.com](https://colab.research.google.com)
+2. Fazer upload do notebook desejado
+3. Executar na primeira célula:
+```python
+!pip install pyspark
+```
+
+---
+
+### Opção 3: Conda (instalação local)
+
+> Scripts de instalação automática disponíveis em [`install/`](install/README.md) para Mac, Windows e Linux.
+
+#### Instalar o Miniconda
+
+**Mac (via Homebrew):**
+
+```bash
+brew install --cask miniconda
+conda init zsh   # ou: conda init bash
+```
+
+Fechar e reabrir o terminal após este passo.
+
+**Windows (via winget):**
+
 ```powershell
+winget install --id Git.Git -e --source winget
 winget install --id Anaconda.Miniconda3 -e --source winget
 ```
 
-> Nota: O `winget` já vem incluído no Windows 10 (20H2+) e Windows 11. Após a instalação, reinicia o terminal para garantir que os comandos fiquem disponíveis.
+> O `winget` já vem incluído no Windows 10 (20H2+) e Windows 11. Reiniciar o terminal após a instalação. Usar o **Anaconda Prompt** ou o **PowerShell** com conda inicializado.
 
-### Opção 1: Google Colab (recomendado para iniciantes)
-1. Aceder a [colab.research.google.com](https://colab.research.google.com)
-2. Fazer upload do notebook desejado
-3. Executar `!pip install pyspark` na primeira célula
+**Linux (Ubuntu/Debian):**
 
-### Opção 2: Ambiente Local
 ```bash
-# Criar ambiente virtual
-python -m venv venv_bigdata
-source venv_bigdata/bin/activate  # Linux/Mac
-# venv_bigdata\Scripts\activate   # Windows
-
-# Instalar dependências
-pip install pyspark pandas numpy matplotlib jupyterlab
-
-# Iniciar Jupyter
-jupyter lab
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda3
+$HOME/miniconda3/bin/conda init bash
 ```
 
-### Opção 3: Conda (recomendado)
+Fechar e reabrir o terminal após este passo.
+
+#### Criar o ambiente PySpark
+
+O comando seguinte é igual em Mac, Windows e Linux. O `openjdk=17` instala o Java automaticamente dentro do ambiente conda, sem necessidade de instalar Java no sistema.
+
+**Opção A — conda (standard):**
+
 ```bash
-conda create -n bigdata python=3.11
+conda create -n bigdata python=3.11 -y
 conda activate bigdata
-conda install -c conda-forge openjdk=17 pyspark jupyterlab ipykernel
+conda install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
 jupyter lab
 ```
 
-## 📝 Requisitos
+**Opção B — conda com libmamba solver (recomendado se for lento):**
 
-- Python 3.9+
-- Java 8/11 (para PySpark local)
-- 4GB+ RAM recomendado
+O solver clássico do `conda` pode ficar preso em `"Solving environment"` durante minutos. A solução mais simples é manter o comando `conda` mas usar o **solver libmamba** por baixo — o mesmo motor do mamba, sem alterar a interface.
+
+```bash
+# Instalar o solver rápido (uma única vez, no ambiente base)
+conda install -n base conda-libmamba-solver --override-channels -c conda-forge -y
+conda config --set solver libmamba
+
+# A partir daqui, todos os comandos conda usam o solver rápido automaticamente
+conda create -n bigdata python=3.11 -y
+conda activate bigdata
+conda install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
+jupyter lab
+```
+
+> **Vantagem:** continuas a usar `conda create`, `conda install`, `conda activate` — zero mudança de hábitos. Só o solver interno é mais rápido.
+
+**Opção C — mamba CLI (mais rápido ainda, interface alternativa):**
+
+Se quiseres uma ferramenta dedicada ainda mais rápida, podes instalar o `mamba` como comando alternativo ao `conda`. Resolve dependências e instala pacotes em segundos, mesmo em bases Anaconda grandes.
+
+```bash
+# Instalar o mamba CLI (uma única vez, no ambiente base)
+conda install -n base -c conda-forge mamba -y
+
+# Criar e configurar o ambiente com mamba
+mamba create -n bigdata python=3.11 -y
+mamba activate bigdata
+mamba install -c conda-forge "openjdk=17" "pyspark>=3.5" pandas jupyterlab ipykernel pyarrow -y
+jupyter lab
+```
+
+#### Mamba e Conda coexistem?
+
+**Sim, podem coexistir perfeitamente** — e é inclusive a forma recomendada de usar o mamba.
+
+**Partilham a mesma infraestrutura:**
+- O mamba usa o mesmo root prefix do conda (`~/anaconda3` ou `~/miniconda3`).
+- Os ambientes criados com `mamba create` aparecem em `conda env list` e vice-versa.
+- `mamba activate bigdata` e `conda activate bigdata` funcionam no mesmo conjunto de ambientes.
+
+**O que difere:**
+- **Velocidade:** o mamba resolve dependências e instala pacotes muito mais rápido que o conda (especialmente em ambientes complexos).
+- **Compatibilidade:** o mamba é mais estrito com certas dependências, enquanto o conda às vezes é mais flexível.
+
+**Uso prático comum:**
+```bash
+# Criar ambiente rápido com mamba
+mamba create -n bigdata python=3.11 -y
+
+# Ativar com conda ou mamba — ambos funcionam
+conda activate bigdata
+# ou
+mamba activate bigdata
+
+# Instalar mais pacotes
+mamba install -c conda-forge pyarrow    # mais rápido
+conda install -c conda-forge jupyter    # também funciona
+```
+
+**Cuidados mínimos:**
+- Mantém o `MAMBA_ROOT_PREFIX` apontando para o teu Anaconda/Miniconda (configura-se automaticamente).
+- Não corras `mamba` e `conda` em simultâneo no mesmo ambiente — pode bloquear a base de dados de pacotes.
+
+**Resumindo:** instalar o mamba no `base` do conda é a prática standard. Usa o mamba quando quiseres velocidade, e o conda quando quiseres compatibilidade máxima — ambos veem os mesmos ambientes.
+
+**Verificar a instalação (obrigatório antes da primeira utilização):**
+
+```bash
+conda activate bigdata
+python install/verify_install.py
+```
+
+Se verificares `[OK]` em todos os itens, o ambiente está pronto.
+
+#### Verificar a instalação
+
+```bash
+conda activate bigdata
+python -c "import pyspark; print('PySpark', pyspark.__version__, '- OK')"
+```
+
+#### Resolução de problemas no Windows
+
+Se o PySpark não iniciar (erro `Java gateway process exited`), verificar se o Java foi reconhecido:
+
+```powershell
+conda activate bigdata
+python -c "import os; print(os.environ.get('JAVA_HOME', 'JAVA_HOME nao definido'))"
+```
+
+Se `JAVA_HOME` não estiver definido, definir manualmente na sessão:
+
+```powershell
+$env:JAVA_HOME = "$env:CONDA_PREFIX\Library"
+jupyter lab
+```
+
+Ou adicionar ao início do notebook:
+
+```python
+import os
+os.environ['JAVA_HOME'] = os.path.join(os.environ['CONDA_PREFIX'], 'Library')
+
+import pyspark
+```
+
+**Script de arranque automático (Windows):**
+
+Para evitar problemas de ativação do ambiente, usar o script de arranque:
+```powershell
+.\install\start_pyspark.ps1
+```
+
+## 📝 Requisitos e compatibilidade de versões
+
+### Versões utilizadas neste projeto
+
+| Componente | Versão mínima | Versão atual (conda-forge) | Porquê |
+|------------|--------------|---------------------------|--------|
+| Python | 3.9 | 3.11.x | PySpark 3.5+ requer Python 3.8+; 3.11 é a versão estável recomendada |
+| Java (OpenJDK) | 17 | 17.x | PySpark 3.5+ suporta Java 8, 11 e 17; Java 17 é LTS e instalável via conda |
+| PySpark | 3.5 | **4.x** | O `pyspark>=3.5` resolve para a versão mais recente — atualmente 4.x |
+| pandas | 2.0+ | 2.x | Versão atual instalada pelo conda; requer PySpark >= 3.5 |
+| PyArrow | qualquer | 23.x | Necessário para leitura de ficheiros Parquet |
+
+### Porquê PySpark >= 3.5 e qual a versão instalada
+
+O `pyspark>=3.5` resolve atualmente para **PySpark 4.x** (via conda-forge). O PySpark 4.x funciona corretamente
+com Python 3.11 e pandas 2.x.
+
+O PySpark inclui uma API chamada `pyspark.pandas` mas o seu uso deve ser evitado: o bug com
+`pandas.core.common._builtin_table` (removido no pandas 2.0) persiste em todas as versões via pip.
+Por isso os notebooks deste projeto **não usam `pyspark.pandas`** — usam `.toPandas()` em alternativa.
+
+**Conversão correta de Spark DataFrame para pandas:**
+
+```python
+# NÃO usar — bug com pandas 2.x em todas as versões pip:
+# import pyspark.pandas as ps
+# df_pandas = ps.DataFrame(df_spark)
+
+# Usar sempre:
+df_pandas = df_spark.toPandas()
+```
+
+`.toPandas()` é o método nativo do PySpark, não tem dependências externas, e funciona com qualquer versão de pandas.
+A limitação é que traz todos os dados para memória — adequado para datasets que cabem numa máquina.
+
+### Porquê Java 17 e não Java 8 ou 11
+
+O Spark corre na JVM (Java Virtual Machine) — é obrigatório ter Java instalado.
+Java 8 e 11 também funcionam com PySpark 3.5, mas:
+
+- **Java 8** está em fim de vida e algumas funcionalidades modernas do Spark emitem avisos
+- **Java 11** funciona, mas o Java 17 é a versão LTS atual e a mais testada com Spark 3.5+
+- **Java 17** é instalado automaticamente pelo conda (`openjdk=17`) sem configuração manual do `JAVA_HOME`
+
+### Porquê conda e não pip
+
+```
+pip install pyspark
+```
+
+Funciona, mas não instala o Java. O utilizador teria de instalar Java manualmente e
+configurar a variável de ambiente `JAVA_HOME` — fonte frequente de erros no Windows.
+
+Com conda (`conda install -c conda-forge openjdk=17 pyspark`), o Java fica instalado
+dentro do ambiente e o `JAVA_HOME` é configurado automaticamente.
+
+### Resumo de requisitos por opção de instalação
+
+- **Docker** — sem requisitos adicionais; Java, Python e PySpark já incluídos na imagem
+- **Conda** — Python 3.11 + Java 17 instalados automaticamente pelo script
+- **RAM** — 4GB mínimo recomendado para correr o Spark localmente
+
+## VS Code
+
+Para abrir os notebooks diretamente no VS Code, instalar as extensões:
+
+```bash
+code --install-extension ms-python.python
+code --install-extension ms-toolsai.jupyter
+code --install-extension ms-toolsai.jupyter-keymap
+code --install-extension ms-toolsai.jupyter-celltags
+```
+
+Depois abrir um `.ipynb`, clicar em **Select Kernel** (canto superior direito) e escolher o ambiente **bigdata**.
+
+Ver [install/README.md](install/README.md) para instruções detalhadas de seleção de kernel e ligação a servidor JupyterLab externo (incluindo Docker).
+
+## Assistente de IA para instalação e resolução de problemas
+
+Para agilizar a configuração do ambiente e resolver erros, recomenda-se usar o **Gemini CLI** — um assistente de IA gratuito que corre diretamente no terminal e tem acesso ao contexto do sistema.
+
+### Instalar o Gemini CLI
+
+```bash
+npm install -g @google/gemini-cli
+gemini
+```
+
+Na primeira execução pede login com conta Google. Após autenticação fica disponível no terminal como `gemini`.
+
+### Exemplos de uso durante a instalação
+
+Descrever o erro diretamente no terminal e pedir ajuda:
+
+```bash
+gemini
+```
+
+```
+> conda install está bloqueado em "Solving environment". Como resolver?
+> Erro: JAVA_HOME is not set. O que significa e como corrigir no Windows?
+> Como verificar se o ambiente bigdata está correto e o PySpark funciona?
+```
+
+O Gemini CLI tem acesso ao sistema de ficheiros e ao terminal, pelo que pode analisar
+logs de erro, verificar versões instaladas e sugerir comandos específicos para a situação.
+
+### Alternativas
+
+- **Claude Code** — `npm install -g @anthropic-ai/claude-code` — alternativa ao Gemini CLI
+- **GitHub Copilot** no VS Code — integrado no editor, útil para erros nos notebooks
 
 ## 📚 Recursos Adicionais
 
