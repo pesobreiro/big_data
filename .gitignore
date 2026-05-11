@@ -58,3 +58,14 @@ Thumbs.db
 output/
 results/
 models/
+
+# Notebook output files (generated during execution)
+notebooks/data/
+notebooks/decision_tree
+notebooks/decision_tree.*
+notebooks/ola.csv
+output_csv/
+output_json/
+output_parquet/
+output_particionado/
+output_delta/
